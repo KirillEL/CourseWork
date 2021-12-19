@@ -14,9 +14,10 @@ class BinaryFile : public fstream
 public:
     BinaryFile(const char *nameFile)
     {
-        f.open(nameFile, ios::binary | ios::in | ios::out);
+        
         try
         {
+            f.open(nameFile, ios::binary | ios::in | ios::out);
             if (f.is_open())
             {
 
@@ -42,6 +43,8 @@ public:
         }
     }
 
+    
+
     fstream &operator<<(typeData &tData)
     {
         f.write((char *)&tData, sizeof(typeData));
@@ -54,37 +57,7 @@ public:
         return *this;
     }
 
-    void Review()
-    {
-        f.seekp(0, ios::beg);
-        f.read((char *)&SizeArray, sizeof(int));
-        f.read((char *)&CurrentCountPtr, sizeof(int));
-        f.read((char *)&PPtrBeginArray, sizeof(pos_type));
-        cout << endl
-             << "Размерность массива указателей: " << SizeArray << endl;
-        cout << " Текущее кол-во указателей: " << CurrentCountPtr << endl;
-        f.seekp(PPtrBeginArray, ios::beg);
-        cout << endl;
-        pos_type tDataAddress;
-
-        for (int i = 0; i < CurrentCountPtr; i++)
-        {
-            f.read((char *)&tDataAddress, sizeof(pos_type));
-            file_ptr = tellp();
-            f.seekp(tDataAddress, ios::beg);
-
-            f.read((char *)&tData, sizeof(typeData));
-        
-
-            
-            char* s = date.get_String();
-            for(int j = 0; j < strlen(s); j++) {
-                cout << s[j];
-            }
-            cout << endl;
-            f.seekp(file_ptr, ios::beg);
-        }
-    }
+    void Review();
 
     void Sort();
 
@@ -116,7 +89,7 @@ public:
         {
             CurrentCountPtr++; // увеличиваем размер массива
             f.seekg(4, ios::beg);
-            f.write((char *)&CurrentCountPtr, sizeof(pos_type));
+            f.write((char *)&CurrentCountPtr, sizeof(int));
             f.seekg(file_ptr + CounterPtr, ios::beg);
             address = f.tellg();
             f.write((char *)&obj, sizeof(typeData));
@@ -148,8 +121,30 @@ public:
         }
     }
 
-    void Update()
+    void Update(int variable)
     {
+        f.seekp(0, ios::beg);
+		f.read((char*)&SizeArray, sizeof(int));
+		f.read((char*)&CurrentCountPtr, sizeof(int));
+		f.read((char*)&PPtrBeginArray, sizeof(pos_type));
+		if (variable <= CurrentCountPtr  && variable > 0)
+		{
+			int TDataAddress;
+			cout << endl << " Íîâûé ýëåìåíò :" << endl << endl << ">> ";
+			
+			f.seekp(PPtrBeginArray + (sizeof(int)*variable) - sizeof(int), ios::beg);
+			f.read((char*)&TDataAddress, sizeof(int));
+			f.seekg(TDataAddress, ios::beg);
+			*this << tData;
+			
+			
+		}
+		else
+		{
+			cout << endl << " Âû ââåëè çíà÷åíèå âíå äèàïàçîíà!! " << endl << endl;
+			system("pause");
+		}
+		
     }
 
     void incrementSizeArray(typeData obj) // функция увеличения размера массива указателей в 2 раза если массив заполнен
@@ -187,7 +182,7 @@ public:
 
 private:
     fstream f;
-    int SizeArray = 1;       // Размер массива указателей
+    int SizeArray = 2;       // Размер массива указателей
     int CurrentCountPtr = 0; // Текущее кол-во указателей
     pos_type file_ptr;
     pos_type PPtrBeginArray;
@@ -198,10 +193,10 @@ private:
 };
 
 template <>
-void BinaryFile<char>::Sort()
+void BinaryFile<string>::Sort()
 {
     pos_type t1, t2;
-    char symbol;
+    string str;
     for (int i = CurrentCountPtr - 1; i >= 0; i--)
     {
         f.seekp(0, ios::beg);
@@ -217,12 +212,12 @@ void BinaryFile<char>::Sort()
             f.seekp(t1, ios::beg);
             *this >> tData;
             f.seekp(t2, ios::beg);
-            *this >> symbol;
-            if (tData > symbol)
+            *this >> str;
+            if (tData.length() > str.length())
             {
-                char temp = tData;
+                string temp = tData;
                 f.seekg(t1, ios::beg);
-                *this << symbol;
+                *this << str;
                 f.seekg(t2, ios::beg);
                 *this << temp;
             }
@@ -263,4 +258,56 @@ void BinaryFile<DateAndTime>::Sort()
             f.seekp(file_ptr, ios::beg);
         }
     }
+}
+
+template<>
+void BinaryFile<string>::Review() { 
+        string out = " ";
+        f.seekp(0, ios::beg);
+        f.read((char *)&SizeArray, sizeof(int));
+        f.read((char *)&CurrentCountPtr, sizeof(int));
+        f.read((char *)&PPtrBeginArray, sizeof(pos_type));
+        cout << endl
+             << "Размерность массива указателей: " << SizeArray << endl;
+        cout << " Текущее кол-во указателей: " << CurrentCountPtr << endl;
+        f.seekg(PPtrBeginArray, ios::beg);
+        cout << endl;
+        pos_type tDataAddress;
+
+        for (int i = 0; i < CurrentCountPtr; i++)
+        {
+            f.read((char *)&tDataAddress, sizeof(pos_type));
+            file_ptr = tellp();
+            f.seekp(file_ptr, ios::beg);
+            f.read((char*)&out, sizeof(string));
+            cout << out;
+            f.seekp(file_ptr, ios::beg);
+        }
+}
+
+template<>
+void BinaryFile<DateAndTime>::Review() {
+        f.seekp(0, ios::beg);
+        f.read((char *)&SizeArray, sizeof(int));
+        f.read((char *)&CurrentCountPtr, sizeof(int));
+        f.read((char *)&PPtrBeginArray, sizeof(pos_type));
+        cout << endl
+             << "Размерность массива указателей: " << SizeArray << endl;
+        cout << " Текущее кол-во указателей: " << CurrentCountPtr << endl;
+        f.seekp(PPtrBeginArray, ios::beg);
+        cout << endl;
+        pos_type tDataAddress;
+
+        for (int i = 0; i < CurrentCountPtr; i++)
+        {
+            f.read((char *)&tDataAddress, sizeof(pos_type));
+            file_ptr = tellp();
+            f.seekp(file_ptr, ios::beg);
+            *this>>tData;
+            char*s = tData.get_String();
+            for(int j = 0; j < strlen(s); j++) {
+                cout << s[j];
+            }
+            f.seekp(file_ptr, ios::beg);
+        }
 }

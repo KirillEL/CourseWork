@@ -8,9 +8,10 @@ int main()
 {
      // MENU 
      int k = 0;
+     
      cout << "Выберите какой файл создать: "
           << "\n";
-     cout << "[1] - char "
+     cout << "[1] - string "
           << "\n";
      cout << "[2] - DateAndTime"
           << "\n";
@@ -18,12 +19,12 @@ int main()
      if (k == 1)
      {
           bool a = true;
-          BinaryFile<char> CharFile("file.bin");
+          BinaryFile<string> StringFile("file.bin");
           while (a == true)
           {
-               //CharFile.Review();
+               
                int f = 0;
-               cout << "Выберите действие с (char) файлом: "
+               cout << "Выберите действие с (string) файлом: "
                     << "\n";
                cout << "[1] - Просмотр файла: "
                     << "\n";
@@ -39,24 +40,26 @@ int main()
                cin >> f;
                if (f == 1)
 
-                    CharFile.Review();
+                    StringFile.Review();
 
                else if (f == 2)
                {    
-                    char c = ' ';
-                    cout << "ВВедите символ который хотите записать в бинарный файл:";
+                    string c;
+                    cout << "ВВедите строку который хотите записать в бинарный файл:";
                     cin >> c;
-                    CharFile.AddObject(c);
+                    StringFile.AddObject(c);
                }
                else if (f == 3)
 
-                    CharFile.RemoveObject();
+                    StringFile.RemoveObject();
 
-               else if (f == 4)
-                    CharFile.Update();
-
+               else if (f == 4) {
+                    int number = 0;
+                    cin >> number;
+                    StringFile.Update(number);
+               }
                else if (f == 5)
-                    CharFile.Sort();
+                    StringFile.Sort();
                if (f == 6)
                {
                     a = false;
@@ -100,9 +103,11 @@ int main()
 
                     DateAndTimeFile.RemoveObject();
 
-               else if (f == 4)
-                    DateAndTimeFile.Update();
-
+               else if (f == 4) {
+                    int number = 0;
+                    cin >> number;
+                    DateAndTimeFile.Update(number);
+               }
                else if (f == 5)
                     DateAndTimeFile.Sort();
                if (f == 6)
