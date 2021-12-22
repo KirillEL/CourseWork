@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include "MyException.hpp"
 #include <iomanip>
+
 using namespace std;
 
 class DateAndTime
@@ -111,27 +112,10 @@ virtual int get_size()
     return size;
 }
 friend fstream &readBinary(fstream&, DateAndTime&);
+friend fstream &outBinary(fstream&, DateAndTime&);
+DateAndTime operator=(DateAndTime &a);
 
-
-friend ostream& operator<<(DateAndTime& obj , ostream& out) {
-  try
-    {
-        obj.set_day(obj.day);
-        obj.set_month(obj.month);
-        obj.set_year(obj.year);
-        obj.set_hours(obj.hours);
-        obj.set_min(obj.min);
-        obj.set_seconds(obj.seconds);
-        if (obj.get_day() == 0 || obj.get_month() == 0 || obj.get_year() == 0 || obj.get_hours() == 0 || obj.get_min() == 0 || obj.get_seconds() == 0)
-            throw MyException("Date Format is uncorrect!");
-        out << setfill('0') << setw(2) << obj.get_day() << "/" << setfill('0') << setw(2) << obj.get_month() << "/" << setfill('0') << setw(4) << obj.get_year() << " " << setfill('0') << setw(2) << obj.get_hours() << ":" << setfill('0') << setw(2) << obj.get_min() << ":" << setfill('0') << setw(2) << obj.get_seconds();
-    }
-    catch (MyException &ex)
-    {
-        cerr << ex.What() << "\n";
-    }
-    return out;
-}
+friend ostream &operator<<(ostream &os, DateAndTime &obj);
 
 private:
   int day;

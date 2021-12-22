@@ -315,26 +315,28 @@ void DateAndTime::set_obj()
 // DateAndTime operator-(DateAndTime &, DateAndTime &); // ready
 
 // // 2 laba
-// DateAndTime DateAndTime::operator=(DateAndTime &a)
-// {
-//     this->set_day(a.day);
-//     this->set_month(a.month);
-//     this->set_year(a.year);
-//     this->set_hours(a.hours);
-//     this->set_min(a.min);
-//     this->set_seconds(a.seconds);
-//     this->date = new char[19];
-//     strcpy(this->date, a.date);
-//     return *this;
-// }
+DateAndTime DateAndTime::operator=(DateAndTime &a)
+{
+    this->set_day(a.day);
+    this->set_month(a.month);
+    this->set_year(a.year);
+    this->set_hours(a.hours);
+    this->set_min(a.min);
+    this->set_seconds(a.seconds);
+    this->date = new char[19];
+    strcpy(this->date, a.date);
+    return *this;
+}
 // // ----------------------------------------------
 
 // // 3 лаба
-// ostream &operator<<(ostream &os, DateAndTime &obj); // ready
+ // ready
 
 // istream &operator>>(istream &in, DateAndTime &obj); // ready
 
 // // 2 laba
+
+ostream &operator<<(ostream &os, DateAndTime &obj);
 
 // DateAndTime::operator char *()
 // {
@@ -353,7 +355,25 @@ void DateAndTime::set_obj()
 // }
 //---------------------------------------------
 
-
+ostream& operator<<(ostream &os , DateAndTime &obj) {
+  try
+    {
+        obj.set_day(obj.day);
+        obj.set_month(obj.month);
+        obj.set_year(obj.year);
+        obj.set_hours(obj.hours);
+        obj.set_min(obj.min);
+        obj.set_seconds(obj.seconds);
+        if (obj.get_day() == 0 || obj.get_month() == 0 || obj.get_year() == 0 || obj.get_hours() == 0 || obj.get_min() == 0 || obj.get_seconds() == 0)
+            throw MyException("Date Format is uncorrect!");
+        os << setfill('0') << setw(2) << obj.get_day() << "/" << setfill('0') << setw(2) << obj.get_month() << "/" << setfill('0') << setw(4) << obj.get_year() << " " << setfill('0') << setw(2) << obj.get_hours() << ":" << setfill('0') << setw(2) << obj.get_min() << ":" << setfill('0') << setw(2) << obj.get_seconds();
+    }
+    catch (MyException &ex)
+    {
+        cerr << ex.What() << "\n";
+    }
+    return os;
+}
 
 // istream &operator>>(istream &in, DateAndTime &obj)
 // {
@@ -441,32 +461,32 @@ void DateAndTime::set_obj()
 //     return in;
 // }
 
-// ofstream &outBinary(ofstream &os, DateAndTime &obj)
-// {
-//     try
-//     {
+fstream &outBinary(fstream &os, DateAndTime &obj)
+{
+    try
+    {
 
-//         if (!os.is_open())
-//             throw MyException("file doesn't open");
-//         else
-//         {
+        if (!os.is_open())
+            throw MyException("file doesn't open");
+        else
+        {
 
-//             os.write((char *)&obj.day, sizeof(int));
-//             os.write((char *)&obj.month, sizeof(int));
-//             os.write((char *)&obj.year, sizeof(int));
-//             os.write((char *)&obj.hours, sizeof(int));
-//             os.write((char *)&obj.min, sizeof(int));
-//             os.write((char *)&obj.seconds, sizeof(int));
+            os.write((char *)&obj.day, sizeof(int));
+            os.write((char *)&obj.month, sizeof(int));
+            os.write((char *)&obj.year, sizeof(int));
+            os.write((char *)&obj.hours, sizeof(int));
+            os.write((char *)&obj.min, sizeof(int));
+            os.write((char *)&obj.seconds, sizeof(int));
 
-//             os.close();
-//         }
-//     }
-//     catch (MyException &ex)
-//     {
-//         cerr << ex.What();
-//     }
-//     return os;
-// }
+            os.close();
+        }
+    }
+    catch (MyException &ex)
+    {
+        cerr << ex.What();
+    }
+    return os;
+}
 
 fstream &readBinary(fstream &in, DateAndTime &obj)
 {
