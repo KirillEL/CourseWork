@@ -7,9 +7,6 @@
 int DateAndTime::get_day() { return day; }
 int DateAndTime::get_month() { return month; }
 int DateAndTime::get_year() { return year; }
-int DateAndTime::get_hours() { return hours; }
-int DateAndTime::get_min() { return min; }
-int DateAndTime::get_seconds() { return seconds; }
 int DateAndTime::get_numberObj() { return numberObj; }
 char *DateAndTime::get_date() { return date; }
 
@@ -64,45 +61,8 @@ void DateAndTime::set_year(int year)
 {
     this->year = year;
 }
-void DateAndTime::set_hours(int hours)
-{
-    try
-    {
-        if (hours < 0 || hours > 24)
-            throw MyException("In a day must be 24 or less hours");
-        this->hours = hours;
-    }
-    catch (MyException &ex)
-    {
-        cerr << ex.What() << "\n";
-    }
-}
-void DateAndTime::set_min(int min)
-{
-    try
-    {
-        if (min < 0 || min > 60)
-            throw MyException("In a hour must be 60 or less mins");
-        this->min = min;
-    }
-    catch (MyException &ex)
-    {
-        cerr << ex.What() << "\n";
-    }
-}
-void DateAndTime::set_seconds(int seconds)
-{
-    try
-    {
-        if (seconds < 0 || seconds > 60)
-            throw MyException("In a min must be 60 or less seconds");
-        this->seconds = seconds;
-    }
-    catch (MyException &ex)
-    {
-        cerr << ex.What() << "\n";
-    }
-}
+
+
 void DateAndTime::set_numberObj(int number)
 {
     this->numberObj = number;
@@ -113,10 +73,8 @@ DateAndTime::DateAndTime(const DateAndTime &t)
     this->set_day(t.day);
     this->set_month(t.month);
     this->set_year(t.year);
-    this->set_hours(t.hours);
-    this->set_min(t.min);
-    this->set_seconds(t.seconds);
-    this->date = new char[19];
+    
+    this->date = new char[10];
     strcpy(this->date, t.date);
     numberObj++;
 }
@@ -193,40 +151,9 @@ void DateAndTime::increaseYear()
 {
     this->year++;
 }
-void DateAndTime::increaseHours()
-{
-    if (this->get_hours() == 23)
-    {
-        this->increaseDay();
-        this->set_hours(0);
-    }
-    else
-        this->set_hours(this->get_hours() + 1);
-}
-void DateAndTime::increaseMinutes()
-{
-    if (this->get_min() == 59)
-    {
-        this->increaseHours();
-        this->set_min(0);
-    }
-    else
-    {
-        this->min++;
-    }
-}
-void DateAndTime::increaseSeconds()
-{
-    if (this->get_seconds() == 59)
-    {
-        this->increaseMinutes();
-        this->set_seconds(0);
-    }
-    else
-    {
-        this->seconds++;
-    }
-}
+
+
+
 void DateAndTime::decreaseYear()
 {
     this->year--;
@@ -268,44 +195,13 @@ void DateAndTime::decreaseDay()
     }
     this->day--;
 }
-void DateAndTime::decreaseHours()
-{
-    if (this->get_hours() == 0)
-    {
-        this->decreaseDay();
-        this->set_hours(24);
-    }
-    this->hours--;
-}
-void DateAndTime::decreaseMinutes()
-{
-    if (this->get_min() == 0)
-    {
-        this->decreaseHours();
-        this->set_min(59);
-    }
-    else
-        this->min--;
-}
-void DateAndTime::decreaseSeconds()
-{
-    if (this->get_seconds() == 0)
-    {
-        this->decreaseMinutes();
-        this->set_seconds(59);
-    }
-    else
-        this->seconds--;
-}
+
 
 void DateAndTime::set_obj()
 {
 
-    sprintf(this->date, "%.2d/%.2d/%.4d %.2d:%.2d:%.2d", this->get_day(), this->get_month(), this->get_year(), this->get_hours(), this->get_min(), this->get_seconds());
+    sprintf(this->date, "%.2d/%.2d/%.4d", this->get_day(), this->get_month(), this->get_year());
 }
-
-
-
 
 // // 2 лаба
 // DateAndTime &operator+(DateAndTime &, int);
@@ -320,17 +216,14 @@ DateAndTime DateAndTime::operator=(DateAndTime &a)
     this->set_day(a.day);
     this->set_month(a.month);
     this->set_year(a.year);
-    this->set_hours(a.hours);
-    this->set_min(a.min);
-    this->set_seconds(a.seconds);
-    this->date = new char[19];
+    this->date = new char[10];
     strcpy(this->date, a.date);
     return *this;
 }
 // // ----------------------------------------------
 
 // // 3 лаба
- // ready
+// ready
 
 // istream &operator>>(istream &in, DateAndTime &obj); // ready
 
@@ -355,25 +248,7 @@ ostream &operator<<(ostream &os, DateAndTime &obj);
 // }
 //---------------------------------------------
 
-ostream& operator<<(ostream &os , DateAndTime &obj) {
-  try
-    {
-        obj.set_day(obj.day);
-        obj.set_month(obj.month);
-        obj.set_year(obj.year);
-        obj.set_hours(obj.hours);
-        obj.set_min(obj.min);
-        obj.set_seconds(obj.seconds);
-        if (obj.get_day() == 0 || obj.get_month() == 0 || obj.get_year() == 0 || obj.get_hours() == 0 || obj.get_min() == 0 || obj.get_seconds() == 0)
-            throw MyException("Date Format is uncorrect!");
-        os << setfill('0') << setw(2) << obj.get_day() << "/" << setfill('0') << setw(2) << obj.get_month() << "/" << setfill('0') << setw(4) << obj.get_year() << " " << setfill('0') << setw(2) << obj.get_hours() << ":" << setfill('0') << setw(2) << obj.get_min() << ":" << setfill('0') << setw(2) << obj.get_seconds();
-    }
-    catch (MyException &ex)
-    {
-        cerr << ex.What() << "\n";
-    }
-    return os;
-}
+
 
 // istream &operator>>(istream &in, DateAndTime &obj)
 // {
@@ -461,60 +336,192 @@ ostream& operator<<(ostream &os , DateAndTime &obj) {
 //     return in;
 // }
 
-fstream &outBinary(fstream &os, DateAndTime &obj)
+fstream &operator<<(fstream &os, DateAndTime &obj)
 {
-    try
-    {
 
-        if (!os.is_open())
-            throw MyException("file doesn't open");
-        else
-        {
-
-            os.write((char *)&obj.day, sizeof(int));
-            os.write((char *)&obj.month, sizeof(int));
-            os.write((char *)&obj.year, sizeof(int));
-            os.write((char *)&obj.hours, sizeof(int));
-            os.write((char *)&obj.min, sizeof(int));
-            os.write((char *)&obj.seconds, sizeof(int));
-
-            os.close();
-        }
-    }
-    catch (MyException &ex)
-    {
-        cerr << ex.What();
-    }
+    os.write((char *)&obj.day, sizeof(int));
+    os.write((char *)&obj.month, sizeof(int));
+    os.write((char *)&obj.year, sizeof(int));
+    
     return os;
 }
 
-fstream &readBinary(fstream &in, DateAndTime &obj)
+fstream &operator>>(fstream &in, DateAndTime &obj)
 {
-    try
-    {
 
-        if (!in.is_open())
-            throw MyException("file doesn't open");
-        else
-        {
-
-            in.read((char *)&obj.day, sizeof(int));
-            in.read((char *)&obj.month, sizeof(int));
-            in.read((char *)&obj.year, sizeof(int));
-            in.read((char *)&obj.hours, sizeof(int));
-            in.read((char *)&obj.min, sizeof(int));
-            in.read((char *)&obj.seconds, sizeof(int));
-            
-            
-            in.close();
-        }
-    }
-    catch (MyException &ex)
-    {
-        cerr << ex.What();
-    }
+    in.read((char*)&obj.day, sizeof(int));
+    in.read((char *)&obj.month, sizeof(int));
+    in.read((char *)&obj.year, sizeof(int));
     return in;
 }
+
+
+ostream &operator<<(ostream &os, DateAndTime &obj) {
+    os << obj.get_day() << "/" << obj.get_month() << "/" << obj.get_year();
+    return os;
+}
+
+
+bool operator> (DateAndTime &a1, DateAndTime &a2) {
+    int Year = a1.get_year();
+    int Year2 = a2.get_year();
+    int Month1 = a1.get_month();
+    int Month2 = a2.get_month();
+    int Day1 = a1.get_day();
+    int Day2 = a2.get_day();
+    int summ1 = 0;
+    int summ2 = 0;
+    for(int i = 0; i < Year; i++) {
+        if((i % 4 == 0 && i % 100 !=0) || (i % 400 == 0)) {
+            summ1 = summ1 + 366;
+        }
+        else {
+            summ1 = summ1 + 365;
+        }
+    }
+
+    for(int i = 0; i < Year2; i++) {
+        if((i % 4 == 0 && i % 100 !=0) || (i % 400 == 0)) {
+            summ2 = summ2 + 366;
+        }
+        else {
+            summ2 = summ2 + 365;
+        }
+    }
+
+    for(int i = 1; i < Month1; i++) {
+        if(i % 2 !=0 && i!=8) {
+            summ1 = summ1 + 31;
+        }
+        else {
+            if(i == 2 && (Year % 4 == 0 && Year % 100 !=0) ) {
+                summ1 = summ1 + 29;
+            }
+            else {
+                if(i % 2 == 0 && i!=2) {
+                    summ1 = summ1 + 30;
+                }
+                else {
+                    summ1 = summ1 + 28;
+                }
+            }
+            
+        }
+    }
+    for(int i = 1; i < Month2; i++) {
+        if(i % 2 !=0 && i!=8) {
+            summ2 = summ2 + 31;
+        }
+        else {
+            if(i == 2 && (Year % 4 == 0 && Year % 100 !=0) ) {
+                summ2 = summ2 + 29;
+            }
+            else {
+                if(i % 2 == 0 && i!=2) {
+                    summ2 = summ2 + 30;
+                }
+                else {
+                    summ2 = summ2 + 28;
+                }
+            }
+            
+        }
+    }
+
+    summ1 = summ1 + Day1;
+    summ2 = summ2 + Day2;
+
+    if(summ1 > summ2) {
+        return true;
+    }
+    
+    return false;
+
+
+
+}
+
+
+bool operator<(DateAndTime& obj1, DateAndTime& obj2) {
+    int Year = obj1.get_year();
+    int Year2 = obj2.get_year();
+    int Month1 = obj1.get_month();
+    int Month2 = obj2.get_month();
+    int Day1 = obj1.get_day();
+    int Day2 = obj2.get_day();
+    int summ1 = 0;
+    int summ2 = 0;
+    for(int i = 0; i < Year; i++) {
+        if((i % 4 == 0 && i % 100 !=0) || (i % 400 == 0)) {
+            summ1 = summ1 + 366;
+        }
+        else {
+            summ1 = summ1 + 365;
+        }
+    }
+
+    for(int i = 0; i < Year2; i++) {
+        if((i % 4 == 0 && i % 100 !=0) || (i % 400 == 0)) {
+            summ2 = summ2 + 366;
+        }
+        else {
+            summ2 = summ2 + 365;
+        }
+    }
+
+    for(int i = 1; i < Month1; i++) {
+        if(i % 2 !=0 && i!=8) {
+            summ1 = summ1 + 31;
+        }
+        else {
+            if(i == 2 && (Year % 4 == 0 && Year % 100 !=0) ) {
+                summ1 = summ1 + 29;
+            }
+            else {
+                if(i % 2 == 0 && i!=2) {
+                    summ1 = summ1 + 30;
+                }
+                else {
+                    summ1 = summ1 + 28;
+                }
+            }
+            
+        }
+    }
+    for(int i = 1; i < Month2; i++) {
+        if(i % 2 !=0 && i!=8) {
+            summ2 = summ2 + 31;
+        }
+        else {
+            if(i == 2 && (Year % 4 == 0 && Year % 100 !=0) ) {
+                summ2 = summ2 + 29;
+            }
+            else {
+                if(i % 2 == 0 && i!=2) {
+                    summ2 = summ2 + 30;
+                }
+                else {
+                    summ2 = summ2 + 28;
+                }
+            }
+            
+        }
+    }
+
+    summ1 = summ1 + Day1;
+    summ2 = summ2 + Day2;
+
+    if(summ1 < summ2) {
+        return true;
+    }
+    
+    return false;
+
+}
+
+
+
+
 
 // // 2 laba
 
