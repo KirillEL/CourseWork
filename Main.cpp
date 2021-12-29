@@ -22,48 +22,63 @@ int main()
           << "\n";
      cout << "[2] - DateAndTime"
           << "\n";
+
      cin >> k;
+
      if (k == 1)
      {
           bool a = true;
-          BinaryFile<int> IntFile(fileName);
+          fstream file(fileName);
+          BinaryFile<int> *IntFile;
+          if (!file)
+          {
+
+               IntFile = new BinaryFile<int>(fileName);
+          }
+          else
+          {
+
+               IntFile = new BinaryFile<int>(fileName, ios::binary | ios::in | ios::out);
+          }
+
+          cout << "--------------------" << endl;
           while (a == true)
           {
 
                int f = 0;
                cout << "Выберите действие с (int) файлом: "
                     << "\n";
-               cout << "[1] - Просмотр файла: "
+               cout << "[1] - Просмотр файла\t "
                     << "\n";
-               cout << "[2] - Добавление элемента "
+               cout << "[2] - Добавление элемента\t "
                     << "\n";
-               cout << "[3] - Удаление элемента "
+               cout << "[3] - Удаление элемента\t "
                     << "\n";
-               cout << "[4] - Обновление файла "
+               cout << "[4] - Обновление файла\t "
                     << "\n";
-               cout << "[5] - Сортировка файла "
+               cout << "[5] - Сортировка файла\t "
                     << "\n";
                cout << "[6] - Выход "
                     << "\n";
 
                cin >> f;
+
                if (f == 1)
-                    IntFile.Review();
+               {
+                    IntFile->Review();
+                    cout << "--------------------" << endl;
+               }
                else if (f == 2)
                {
                     int c;
-                    string b;
-                    while(b!="no") {
-                    cout << "ВВедите число который хотите записать в бинарный файл:";
+
+                    cout << "ВВедите число которое хотите записать в бинарный файл:";
                     cin >> c;
-                    IntFile.AddElement(c);
-                    cout << "Еще число ввести?[yes][no]: ";
-                    cin >> b;
-                    }
+                    IntFile->AddElement(c);
                }
                else if (f == 3)
-                    //IntFile.getArrayPos();
-                    IntFile.DeleteElement();
+
+                    IntFile->DeleteElement();
 
                else if (f == 4)
                {
@@ -71,14 +86,14 @@ int main()
                     string fileN;
                     cin >> fileN;
                     fileN = fileN + dat;
-                    IntFile.Update(fileN);
+                    IntFile->Update(fileN);
                }
                else if (f == 5)
-                    IntFile.Sort();
+                    IntFile->Sort();
 
                else if (f == 6)
                {
-
+                    delete IntFile;
                     a = false;
                }
           }
@@ -86,30 +101,45 @@ int main()
      else if (k == 2)
      {
           bool b = true;
-          BinaryFile<DateAndTime> DateFile(fileName);
+          fstream file(fileName);
+          BinaryFile<DateAndTime> *DateFile;
+          if (!file)
+          {
+
+               DateFile = new BinaryFile<DateAndTime>(fileName);
+          }
+          else
+          {
+
+               DateFile = new BinaryFile<DateAndTime>(fileName, ios::binary | ios::in | ios::out);
+          }
+          cout << "--------------------" << endl;
           while (b == true)
           {
 
                int f = 0;
                cout << "Выберите дествие с (DateAndTime) файлом: "
                     << "\n";
-               cout << "[1] - Просмотр файла: "
+               cout << "[1] - Просмотр файла\t "
                     << "\n";
-               cout << "[2] - Добавление элемента "
+               cout << "[2] - Добавление элемента\t "
                     << "\n";
-               cout << "[3] - Удаление элемента "
+               cout << "[3] - Удаление элемента\t "
                     << "\n";
-               cout << "[4] - Обновление файла "
+               cout << "[4] - Обновление файла\t "
                     << "\n";
-               cout << "[5] - Сортировка файла "
+               cout << "[5] - Сортировка файла\t "
                     << "\n";
                cout << "[6] - Выход " << endl;
 
                cin >> f;
+
                if (f == 1)
+               {
 
-                    DateFile.Review();
-
+                    DateFile->Review();
+                    cout << "--------------------" << endl;
+               }
                else if (f == 2)
                {
                     int d, m, y;
@@ -121,27 +151,31 @@ int main()
                     cin >> y;
 
                     DateAndTime d1(d, m, y);
-                    DateFile.AddElement(d1);
+
+                    DateFile->AddElement(d1);
+                    cout << "--------------------" << endl;
                }
                else if (f == 3)
 
-                    DateFile.DeleteElement();
-                    
+                    DateFile->DeleteElement();
+
                else if (f == 4)
                {
                     cout << "Введите имя копии основного файла: ";
                     string fileN;
                     cin >> fileN;
                     fileN = fileN + dat;
-                    DateFile.Update(fileN);
+                    DateFile->Update(fileN);
                }
                else if (f == 5)
-                    DateFile.Sort();
+                    DateFile->Sort();
                else if (f == 6)
                {
+                    delete DateFile;
                     b = false;
                }
           }
      }
+
      return 0;
 }

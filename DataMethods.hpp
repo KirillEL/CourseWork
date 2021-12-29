@@ -203,14 +203,7 @@ void DateAndTime::set_obj()
     sprintf(this->date, "%.2d/%.2d/%.4d", this->get_day(), this->get_month(), this->get_year());
 }
 
-// // 2 лаба
-// DateAndTime &operator+(DateAndTime &, int);
-// DateAndTime &operator-(DateAndTime &, int);
 
-// DateAndTime operator+(DateAndTime &, DateAndTime &); // ready
-// DateAndTime operator-(DateAndTime &, DateAndTime &); // ready
-
-// // 2 laba
 DateAndTime DateAndTime::operator=(DateAndTime &a)
 {
     this->set_day(a.day);
@@ -220,121 +213,9 @@ DateAndTime DateAndTime::operator=(DateAndTime &a)
     strcpy(this->date, a.date);
     return *this;
 }
-// // ----------------------------------------------
 
-// // 3 лаба
-// ready
-
-// istream &operator>>(istream &in, DateAndTime &obj); // ready
-
-// // 2 laba
 
 ostream &operator<<(ostream &os, DateAndTime &obj);
-
-// DateAndTime::operator char *()
-// {
-//     this->set_obj();
-//     return this->get_String();
-// }
-
-// DateAndTime operator+(DateAndTime &a, DateAndTime &b)
-// {
-//     return (DateAndTime(a.day + b.day, a.month + b.month, a.year + b.year, a.hours + b.hours, a.min + b.min, a.seconds + b.seconds));
-// }
-
-// DateAndTime operator-(DateAndTime &a, DateAndTime &b)
-// {
-//     return (DateAndTime(a.day - b.day, a.month - b.month, a.year - b.year, a.hours - b.hours, a.min - b.min, a.seconds - b.seconds));
-// }
-//---------------------------------------------
-
-
-
-// istream &operator>>(istream &in, DateAndTime &obj)
-// {
-//     int dayI, monthI, yearI, hoursI, minI, secondsI;
-//     char date[10];
-//     char time[8];
-//     in >> date;
-
-//     if (date[0] == 0)
-//     {
-//         dayI = date[1] - '0';
-//     }
-//     else
-//     {
-//         dayI = 10 * (date[0] - '0') + date[1] - '0';
-//     }
-
-//     if (date[3] == '0')
-//     {
-//         monthI = date[4] - '0';
-//     }
-//     else
-//     {
-//         monthI = 10 * (date[3] - '0') + date[4] - '0';
-//     }
-
-//     if (date[6] == 0)
-//     {
-//         if (date[7] == 0)
-//         {
-//             if (date[8] == 0)
-//             {
-//                 yearI = date[9] - '0';
-//             }
-//             else
-//             {
-//                 yearI = 10 * (date[8] - '0') + date[9] - '0';
-//             }
-//         }
-//         else
-//         {
-//             yearI = 100 * (date[7] - '0') + 10 * (date[8] - '0') + date[9] - '0';
-//         }
-//     }
-//     else
-//     {
-//         yearI = 1000 * (date[6] - '0') + 100 * (date[7] - '0') + 10 * (date[8] - '0') + date[9] - '0';
-//     }
-
-//     in >> time;
-
-//     if (time[0] == 0)
-//     {
-//         hoursI = time[1] - '0';
-//     }
-//     else
-//     {
-//         hoursI = 10 * (time[0] - '0') + time[1] - '0';
-//     }
-
-//     if (time[3] == 0)
-//     {
-//         minI = time[4] - '0';
-//     }
-//     else
-//     {
-//         minI = 10 * (time[3] - '0') + time[4] - '0';
-//     }
-
-//     if (time[6] == 0)
-//     {
-//         secondsI = time[7] - '0';
-//     }
-//     else
-//     {
-//         secondsI = 10 * (time[6] - '0') + time[7] - '0';
-//     }
-//     obj.set_day(dayI);
-//     obj.set_month(monthI);
-//     obj.set_year(yearI);
-//     obj.set_hours(hoursI);
-//     obj.set_min(minI);
-//     obj.set_seconds(secondsI);
-
-//     return in;
-// }
 
 fstream &operator<<(fstream &os, DateAndTime &obj)
 {
@@ -357,7 +238,7 @@ fstream &operator>>(fstream &in, DateAndTime &obj)
 
 
 ostream &operator<<(ostream &os, DateAndTime &obj) {
-    os << obj.get_day() << "/" << obj.get_month() << "/" << obj.get_year();
+    os << obj.get_day() << "/" <<setfill('0')<<setw(2)<< obj.get_month() << "/" << obj.get_year();
     return os;
 }
 
@@ -441,7 +322,6 @@ bool operator> (DateAndTime &a1, DateAndTime &a2) {
 
 }
 
-
 bool operator<(DateAndTime& obj1, DateAndTime& obj2) {
     int Year = obj1.get_year();
     int Year2 = obj2.get_year();
@@ -523,23 +403,3 @@ bool operator<(DateAndTime& obj1, DateAndTime& obj2) {
 
 
 
-// // 2 laba
-
-// DateAndTime &operator+(DateAndTime &obj, int num)
-// {
-//     for (int t = num; t > 0; t--)
-//     {
-//         obj.increaseHours();
-//     }
-
-//     return obj;
-// }
-
-// DateAndTime &operator-(DateAndTime &obj, int num)
-// {
-//     for (; num > 0; num--)
-//     {
-//         obj.decreaseHours();
-//     }
-//     return obj;
-// }

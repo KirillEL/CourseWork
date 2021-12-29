@@ -5,41 +5,38 @@
 #include "DateAndTime.hpp"
 #include <cstdlib>
 #include <string>
-
+#include <time.h>
 using namespace std;
 
 template <class typeData>
 class BinaryFile : public fstream
 {
 private:
-    typeData **Array;
     int SizeArray = 2;
+    int PtrBeginArray = 0;
+    int PtrFile = 0;
     int CurrentCountPtr = 0;
-    long ArrayAddress = 0;
-    long ArrayPos = 0;
-    long backArray = 0;
-    long ArrayNew = 0;
-    long ArrayOld = 0;
+    int CounterPtr = 0;
+    typeData data;
 
 public:
     BinaryFile(string nameFile) : basic_fstream(nameFile, ios::in | ios::binary | ios::out | ios::trunc)
     {
         try
         {
-
             if (is_open())
             {
-                Array = new typeData *[SizeArray];
-                for (int i = 0; i < SizeArray; i++)
-                    Array[i] = new typeData;
-                seekg(0, ios::beg);
+                seekp(0, ios::beg);
                 write((char *)&SizeArray, sizeof(int));
                 write((char *)&CurrentCountPtr, sizeof(int));
-                ArrayAddress = tellg();
-                write((char *)&ArrayAddress, sizeof(int));
-                ArrayNew = tellg();
-                write((char *)&Array, sizeof(typeData));
-                ArrayPos = tellg();
+                PtrFile = tellg();
+                CounterPtr = sizeof(typeData);
+                seekg(PtrFile + CounterPtr, ios::beg);
+                PtrBeginArray = tellg();
+                cout << PtrBeginArray << endl;
+                seekg(PtrFile, ios::beg);
+                write((char *)&PtrBeginArray, sizeof(int));
+                SizeArray = CurrentCountPtr = PtrFile = CounterPtr = PtrBeginArray = 0;
             }
             else
                 throw MyException("file doesnt open!");
@@ -50,78 +47,88 @@ public:
         }
     }
 
-    void AddElement(typeData &el)
+    BinaryFile(string nameFile, ios_base::openmode _Mode) : basic_fstream(nameFile, _Mode)
     {
+        getPosition();
+    }
 
+    fstream &operator<<(typeData &obj)
+    {
+        write((char *)&obj, sizeof(typeData));
+        return *this;
+    }
+
+    fstream &operator>>(typeData &obj)
+    {
+        read((char *)&obj, sizeof(typeData));
+        return *this;
+    }
+
+    void AddElement(typeData el)
+    {
         seekg(0, ios::beg);
         read((char *)&SizeArray, sizeof(int));
         read((char *)&CurrentCountPtr, sizeof(int));
-        read((char *)&ArrayAddress, sizeof(int));
-        seekp(ArrayAddress, ios::beg);
-        if (SizeArray == CurrentCountPtr)
+        read((char *)&PtrBeginArray, sizeof(int));
+
+        seekg(PtrBeginArray, ios::beg);
+        PtrFile = tellp();
+        int DataAddress;
+        if (SizeArray != CurrentCountPtr)
         {
-            incrementSizeArray(el);
+            CurrentCountPtr += 1;
+            seekg(4, ios::beg);
+            write((char *)&CurrentCountPtr, sizeof(int));
+            seekg(PtrFile + CounterPtr, ios::beg);
+            DataAddress = tellg();
+            
+            *this << el;
+            
+            CounterPtr = CounterPtr + sizeof(typeData);
+            
+            seekg(0, ios::end);
+            write((char*)&DataAddress, sizeof(int));
         }
         else
-        {
-
-            CurrentCountPtr = CurrentCountPtr + 1;
-            Array[CurrentCountPtr - 1] = new typeData;
-            Array[CurrentCountPtr - 1][0] = el;
-            seekg(0, ios::beg);
-            write((char *)&SizeArray, sizeof(int));
-            write((char *)&CurrentCountPtr, sizeof(int));
-            write((char *)&ArrayAddress, sizeof(int));
-
-            write((char *)&Array, sizeof(typeData));
-            seekg(ArrayPos, ios::beg);
-            for (int i = 0; i < CurrentCountPtr; i++)
-            {
-                write((char *)&Array[i][0], sizeof(typeData));
-            }
-        }
+            incrementSizeArray(el);
+        PtrBeginArray = SizeArray = CurrentCountPtr = PtrFile = DataAddress = 0;
     }
 
-    void incrementSizeArray(typeData &element)
+    void incrementSizeArray(typeData element)
     {
-
         SizeArray = SizeArray * 2;
-
         seekg(0, ios::beg);
         write((char *)&SizeArray, sizeof(int));
-
-        seekg(ArrayAddress, ios::beg);
-
-        ArrayOld = tellp();
-
+        seekg(PtrBeginArray, ios::beg);
+        int DataOld = tellp();
         seekg(0, ios::end);
-
-        ArrayPos = tellg();
-
-        seekp(ArrayOld, ios::beg);
-        read((char *)&ArrayAddress, sizeof(int));
-        ArrayOld = tellp();
-        seekg(ArrayPos, ios::beg);
-        ArrayAddress = tellg();
-        seekp(8, ios::beg);
-
-        write((char *)&ArrayAddress, sizeof(int));
-        seekg(ArrayPos, ios::beg);
-        ArrayNew = tellg();
-
-        seekg(ArrayPos, ios::beg);
+        int DataNew = tellg();
+        int DataAddress;
+        PtrBeginArray = tellg();
         for (int i = 0; i < CurrentCountPtr; i++)
         {
-            write((char *)&Array[i][0], sizeof(typeData));
+            
+            seekg(DataOld, ios::beg);
+            
+            
+            *this >> data;
+            //DataAddress = tellg();
+            DataOld = tellp();
+            
+            
+            seekg(DataNew, ios::beg);
+            
+            *this << data;
+            //DataAddress = tellg();
+            //write((char*)&DataAddress, sizeof(int));
+            DataNew = tellg();
+            //seekg(0, ios::end);
+            //write((char *)&DataAddress, sizeof(int));
         }
+        seekg(8, ios::beg);
+        write((char *)&PtrBeginArray, sizeof(int));
         AddElement(element);
-    }
-
-    void getArrayPos()
-    {
-        cout << ArrayAddress << endl;
-        cout << ArrayNew << endl;
-        cout << ArrayPos << endl;
+        DataNew = DataOld = DataAddress =  0;
     }
 
     void Review()
@@ -129,74 +136,107 @@ public:
         seekg(0, ios::beg);
         read((char *)&SizeArray, sizeof(int));
         read((char *)&CurrentCountPtr, sizeof(int));
-        read((char *)&ArrayAddress, sizeof(int));
-        typeData **NewArray;
-        NewArray = new typeData *[SizeArray];
-        for (int i = 0; i < SizeArray; i++)
-        {
-            NewArray[i] = new typeData;
-        }
-        cout << "Размерность массива указателей: " << SizeArray << endl;
-        cout << "Текущее кол-во указателей: " << CurrentCountPtr << endl;
-        read((char *)&NewArray, sizeof(typeData));
-        seekp(ArrayPos, ios::beg);
+        read((char *)&PtrBeginArray, sizeof(int));
+        cout << "Текущий размер массива --> " << SizeArray << endl;
+        cout << "Текущее кол-во указателей --> " << CurrentCountPtr << endl;
+
+        seekp(PtrBeginArray, ios::beg);
+
+        int DataAddress;
+        int DataElement;
         for (int i = 0; i < CurrentCountPtr; i++)
         {
-            read((char *)&NewArray[i][0], sizeof(typeData));
-            cout << NewArray[i][0] << endl;
+            DataAddress = tellg();
+            *this >> data;
+            
+            PtrFile = tellp();
+            seekg(DataAddress, ios::beg);
+            *this >> data;
+            cout << i + 1 << " --> " << data << endl;
+            seekg(PtrFile, ios::beg);
         }
+        DataAddress = 0;
+        DataElement = 0;
     }
 
     void DeleteElement()
     {
-        seekp(4, ios::beg);
+        seekg(4, ios::beg);
         read((char *)&CurrentCountPtr, sizeof(int));
         if (CurrentCountPtr > 0)
         {
             CurrentCountPtr--;
-            seekp(4, ios::beg);
+            seekg(4, ios::beg);
             write((char *)&CurrentCountPtr, sizeof(int));
+            CounterPtr = CounterPtr - sizeof(typeData);
         }
         else
         {
-            cout << "Файл пуст!" << endl;
+            cout << "Файл пуст!";
         }
+        SizeArray = CurrentCountPtr = PtrFile = PtrBeginArray = 0;
     }
 
     void Sort()
     {
-
-        seekg(12, ios::beg);
-        read((char *)&Array, sizeof(typeData));
-        seekg(ArrayPos, ios::beg);
-        for (int i = 0; i < CurrentCountPtr; i++)
+        int aData, bData;
+        int aDataPos, bDataPos;
+        typeData dat;
+        for (int i = CurrentCountPtr - 1; i > 0; i--)
         {
-            read((char *)&Array[i][0], sizeof(typeData));
-        }
-        for (int startIndex = 0; startIndex < CurrentCountPtr - 1; startIndex++)
-        {
-            int smallestIndex = startIndex;
-            for (int currentIndex = startIndex + 1; currentIndex < CurrentCountPtr; ++currentIndex)
+            seekg(0, ios::beg);
+            read((char *)&SizeArray, sizeof(int));
+            read((char *)&CurrentCountPtr, sizeof(int));
+            read((char *)&PtrBeginArray, sizeof(int));
+            seekp(PtrBeginArray, ios::beg);
+            for (int j = 0; j < i; j++)
             {
-                if (Array[currentIndex][0] < Array[smallestIndex][0])
-                {
-                    smallestIndex = currentIndex;
-                }
-            }
-            std::swap(Array[startIndex], Array[smallestIndex]);
-        }
+                aDataPos = tellg();
+                
+                *this >> data;
 
-        seekp(12, ios::beg);
-        write((char *)&Array, sizeof(typeData));
-        seekg(ArrayPos, ios::beg);
-        for (int i = 0; i < CurrentCountPtr; ++i)
-        {
-            write((char *)&Array[i][0], sizeof(typeData));
+                PtrFile = tellp();
+                bDataPos = tellg();
+                
+                *this >> data;
+
+                seekg(aDataPos, ios::beg);
+                *this >> data;
+                seekg(bDataPos, ios::beg);
+                *this >> dat;
+                if (data > dat)
+                {
+                    typeData temp = data;
+                    seekp(aDataPos, ios::beg);
+                    *this << dat;
+                    seekg(bDataPos, ios::beg);
+                    *this << temp;
+                }
+                seekp(PtrFile, ios::beg);
+            }
         }
+        SizeArray = CurrentCountPtr = PtrBeginArray = PtrFile = aData = bData = 0;
+    }
+
+    void getPosition()
+    {
+        CounterPtr = sizeof(typeData);
+        seekp(-CounterPtr, ios::end);
+        
+        read((char *)&CounterPtr, sizeof(int));
+        
+        //seekp(CounterPtr+ sizeof(typeData), ios::beg);
+
+        CounterPtr = tellp();
+        
+        CounterPtr = CounterPtr - (sizeof(typeData) * 3);
+        cout << CounterPtr << endl;
+
     }
 
     void Update(string fileN)
     {
+
         fstream fileCopy(fileN, ios::binary | ios::out | ios::trunc);
         if (!fileCopy)
         {
@@ -204,145 +244,81 @@ public:
         }
         else
         {
-            int sz;
-            int curr;
-            int Addr;
-            typeData **Arr;
-            seekg(0, ios::beg);
-            read((char *)&sz, sizeof(int));
-            read((char *)&curr, sizeof(int));
-            read((char *)&Addr, sizeof(int));
-            Arr = new typeData *[sz];
-            for (int i = 0; i < sz; i++)
-            {
-                Arr[i] = new typeData;
-            }
-            seekg(12, ios::beg);
-            read((char *)&Arr, sizeof(typeData));
-            seekg(ArrayPos, ios::beg);
-            for (int i = 0; i < curr; i++)
-            {
-                read((char *)&Arr[i][0], sizeof(typeData));
-            }
-            fileCopy.seekp(0, ios::beg);
-            fileCopy.write((char *)&sz, sizeof(int));
-            fileCopy.write((char *)&curr, sizeof(int));
-            fileCopy.write((char *)&Addr, sizeof(int));
-            fileCopy.write((char *)&Arr, sizeof(typeData));
-            for (int i = 0; i < curr; i++)
-            {
-                fileCopy.write((char *)&Arr[i][0], sizeof(typeData));
-            }
-        }
+            seekg(ios::beg);
+            read((char *)&SizeArray, sizeof(int));
+            read((char *)&CurrentCountPtr, sizeof(int));
+            read((char *)&PtrBeginArray, sizeof(int));
 
-        fileCopy.close();
+            seekg(PtrBeginArray, ios::beg);
+
+            // PtrFile = tellg();
+            int element;
+            int elAdrress;
+
+            int FileCopyPtr;
+            fileCopy.seekg(ios::beg);
+            fileCopy.write((char *)&SizeArray, sizeof(int));
+            fileCopy.write((char *)&CurrentCountPtr, sizeof(int));
+            fileCopy.write((char *)&PtrBeginArray, sizeof(int));
+
+            fileCopy.seekg(PtrBeginArray, ios::beg);
+
+            for (int i = 0; i < CurrentCountPtr; i++)
+            {
+                elAdrress = tellg();
+                read((char *)&element, sizeof(int));
+                *this >> data;
+                PtrFile = tellg();
+                FileCopyPtr = tellg();
+                seekg(elAdrress, ios::beg);
+                fileCopy.seekg(elAdrress, ios::beg);
+                *this >> data;
+                fileCopy << data;
+                seekg(PtrFile, ios::beg);
+                fileCopy.seekg(FileCopyPtr, ios::beg);
+            }
+            elAdrress = 0;
+            element = 0;
+
+            fileCopy.close();
+        }
     }
 
     ~BinaryFile()
     {
-        for (int i = 0; i < CurrentCountPtr; ++i)
-        {
-            delete[] Array[i];
-        }
-        delete[] Array;
+
         close();
     }
 };
 
-template <>
 
-void BinaryFile<DateAndTime>::Sort()
-{
-    seekg(12, ios::beg);
-    read((char*)&Array , sizeof(int));
-    seekg(ArrayPos, ios::beg);
-        for (int i = 0; i < CurrentCountPtr; i++)
-        {
-            *this >> Array[i][0];
-        }
-    //seekg(ArrayPos, ios::beg);
-    for (int i = 0; i < CurrentCountPtr - 1; ++i)
-    {
-        int f = i;
-        for (int currentIndex = i + 1; currentIndex < CurrentCountPtr; currentIndex++)
-        {
-            if (Array[currentIndex][0] < Array[f][0])
-            {
-                f = currentIndex;
-            }
-            
-            std::swap(Array[i], Array[f]);
-        }
-    }
-    // seekg(ArrayPos, ios::beg);
-    seekp(12, ios::beg);
-    write((char *)&Array, sizeof(int));
-    seekp(ArrayPos, ios::beg);
-    for (int i = 0; i < CurrentCountPtr; ++i)
-    {
-        *this << Array[i][0];
-    }
-}
 
-template <>
-void BinaryFile<DateAndTime>::Review()
-{
+// template <>
+// void BinaryFile<DateAndTime>::Review()
+// {
+//     seekg(0, ios::beg);
+//     read((char *)&SizeArray, sizeof(int));
+//     read((char *)&CurrentCountPtr, sizeof(int));
+//     read((char *)&PtrBeginArray, sizeof(int));
+//     cout << "Текущий размер массива --> " << SizeArray << endl;
+//     cout << "Текущее кол-во указателей --> " << CurrentCountPtr << endl;
 
-    seekg(0, ios::beg);
-    read((char *)&SizeArray, sizeof(int));
-    read((char *)&CurrentCountPtr, sizeof(int));
-    read((char *)&ArrayAddress, sizeof(int));
-    DateAndTime **NerArray;
-    NerArray = new DateAndTime *[SizeArray];
-    for (int i = 0; i < SizeArray; i++)
-    {
-        NerArray[i] = new DateAndTime;
-    }
-    cout << "Размерность массива указателей: " << SizeArray << endl;
-    cout << "Текущее кол-во указателей: " << CurrentCountPtr << endl;
-    // seekg(ArrayPos, ios::beg);
-    seekg(12, ios::beg);
-    //seekg(ArrayNew, ios::beg);
-    read((char *)&NerArray, sizeof(int));
-    seekg(ArrayPos, ios::beg);
-    for (int i = 0; i < CurrentCountPtr; i++)
-    {
-        *this >> NerArray[i][0];
-        cout << NerArray[i][0] << endl;
-    }
-}
+//     seekp(PtrBeginArray, ios::beg);
 
-template <>
-void BinaryFile<DateAndTime>::AddElement(DateAndTime &obj)
-{
-    seekg(0, ios::beg);
-    read((char *)&SizeArray, sizeof(int));
-    read((char *)&CurrentCountPtr, sizeof(int));
-    read((char *)&ArrayAddress, sizeof(int));
-    seekp(ArrayAddress, ios::beg);
-    if (SizeArray == CurrentCountPtr)
-    {
-        incrementSizeArray(obj);
-    }
-    else
-    {
-
-        CurrentCountPtr = CurrentCountPtr + 1;
-        Array[CurrentCountPtr - 1] = new DateAndTime;
-        Array[CurrentCountPtr - 1][0].set_day(obj.get_day());
-        Array[CurrentCountPtr - 1][0].set_month(obj.get_month());
-        Array[CurrentCountPtr - 1][0].set_year(obj.get_year());
-        seekp(0, ios::beg);
-        write((char *)&SizeArray, sizeof(int));
-        write((char *)&CurrentCountPtr, sizeof(int));
-        write((char *)&ArrayAddress, sizeof(int));
-        seekp(12, ios::beg);
-        // seekg(ArrayNew, ios::beg);
-        write((char *)&Array, sizeof(int));
-        seekp(ArrayPos, ios::beg);
-        for (int i = 0; i < CurrentCountPtr; i++)
-        {
-            *this << Array[i][0];
-        }
-    }
-}
+//     int DataAddress;
+//     int DataElement;
+//     for (int i = 0; i < CurrentCountPtr; i++)
+//     {
+//         DataAddress = tellg();
+//         //read((char *)&DataElement, sizeof(int));
+//         *this >> data;
+//         PtrFile = tellp();
+//         seekg(DataAddress, ios::beg);
+//         cout << DataAddress << endl;
+//         *this >> data;
+//         cout << i + 1 << " --> " << data << endl;
+//         seekg(PtrFile, ios::beg);
+//     }
+//     DataAddress = 0;
+//     DataElement = 0;
+// }
