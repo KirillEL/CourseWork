@@ -74,9 +74,9 @@ DateAndTime::DateAndTime(const DateAndTime &t)
     this->set_month(t.month);
     this->set_year(t.year);
     
-    this->date = new char[10];
-    strcpy(this->date, t.date);
-    numberObj++;
+    //this->date = new char[10];
+    //strcpy(this->date, t.date);
+    //numberObj++;
 }
 
 void DateAndTime::increaseDay()

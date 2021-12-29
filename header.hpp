@@ -64,6 +64,7 @@ public:
         return *this;
     }
 
+
     void AddElement(typeData el)
     {
         seekg(0, ios::beg);
@@ -163,12 +164,14 @@ public:
     {
         seekg(4, ios::beg);
         read((char *)&CurrentCountPtr, sizeof(int));
+        
         if (CurrentCountPtr > 0)
         {
             CurrentCountPtr--;
             seekg(4, ios::beg);
             write((char *)&CurrentCountPtr, sizeof(int));
             CounterPtr = CounterPtr - sizeof(typeData);
+            
         }
         else
         {
@@ -227,7 +230,7 @@ public:
     void Update(string fileN)
     {
 
-        fstream fileCopy(fileN, ios::binary | ios::out | ios::trunc);
+        fstream fileCopy(fileN, ios::binary | ios::in | ios::out | ios::trunc);
         if (!fileCopy)
         {
             cout << "file doesnt open";
@@ -241,22 +244,21 @@ public:
 
             seekg(PtrBeginArray, ios::beg);
 
-            // PtrFile = tellg();
+            PtrFile = tellg();
             int element;
             int elAdrress;
 
             int FileCopyPtr;
-            fileCopy.seekg(ios::beg);
+            fileCopy.seekp(ios::beg);
             fileCopy.write((char *)&SizeArray, sizeof(int));
             fileCopy.write((char *)&CurrentCountPtr, sizeof(int));
             fileCopy.write((char *)&PtrBeginArray, sizeof(int));
 
-            fileCopy.seekg(PtrBeginArray, ios::beg);
 
             for (int i = 0; i < CurrentCountPtr; i++)
             {
                 elAdrress = tellg();
-                read((char *)&element, sizeof(int));
+                
                 *this >> data;
                 PtrFile = tellg();
                 FileCopyPtr = tellg();
@@ -264,12 +266,13 @@ public:
                 fileCopy.seekg(elAdrress, ios::beg);
                 *this >> data;
                 fileCopy << data;
+                fileCopy.seekp(4,ios::cur);
                 seekg(PtrFile, ios::beg);
-                fileCopy.seekg(FileCopyPtr, ios::beg);
+                fileCopy.seekg(FileCopyPtr,ios::beg);
+                
             }
             elAdrress = 0;
             element = 0;
-
             fileCopy.close();
         }
     }
