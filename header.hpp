@@ -79,18 +79,22 @@ public:
             CurrentCountPtr += 1;
             seekg(4, ios::beg);
             write((char *)&CurrentCountPtr, sizeof(int));
+            
             seekg(PtrFile + CounterPtr, ios::beg);
-            DataAddress = tellg();
+           // DataAddress = tellg();
             
             *this << el;
             
             CounterPtr = CounterPtr + sizeof(typeData);
             
-            seekg(0, ios::end);
-            write((char*)&DataAddress, sizeof(int));
+            //seekg(0, ios::end);
+            //write((char*)&DataAddress, sizeof(int));
         }
-        else
+        else{
+            
             incrementSizeArray(el);
+            
+        }
         PtrBeginArray = SizeArray = CurrentCountPtr = PtrFile = DataAddress = 0;
     }
 
@@ -107,28 +111,24 @@ public:
         PtrBeginArray = tellg();
         for (int i = 0; i < CurrentCountPtr; i++)
         {
-            
             seekg(DataOld, ios::beg);
-            
-            
             *this >> data;
-            //DataAddress = tellg();
+            //read((char*)&DataAddress, sizeof(int));
             DataOld = tellp();
-            
-            
             seekg(DataNew, ios::beg);
             
+            
             *this << data;
-            //DataAddress = tellg();
-            //write((char*)&DataAddress, sizeof(int));
+           
+            
             DataNew = tellg();
-            //seekg(0, ios::end);
-            //write((char *)&DataAddress, sizeof(int));
+            
         }
         seekg(8, ios::beg);
         write((char *)&PtrBeginArray, sizeof(int));
+        
         AddElement(element);
-        DataNew = DataOld = DataAddress =  0;
+        DataNew = DataOld =  0;
     }
 
     void Review()
@@ -192,14 +192,10 @@ public:
             for (int j = 0; j < i; j++)
             {
                 aDataPos = tellg();
-                
                 *this >> data;
-
                 PtrFile = tellp();
                 bDataPos = tellg();
-                
                 *this >> data;
-
                 seekg(aDataPos, ios::beg);
                 *this >> data;
                 seekg(bDataPos, ios::beg);
@@ -220,18 +216,12 @@ public:
 
     void getPosition()
     {
-        CounterPtr = sizeof(typeData);
-        seekp(-CounterPtr, ios::end);
-        
-        read((char *)&CounterPtr, sizeof(int));
-        
-        //seekp(CounterPtr+ sizeof(typeData), ios::beg);
+       seekg(4, ios::beg);
+       read((char *)&CurrentCountPtr, sizeof(int));
+       read((char*)&PtrBeginArray, sizeof(int));
 
-        CounterPtr = tellp();
+       CounterPtr = CurrentCountPtr*sizeof(typeData);
         
-        CounterPtr = CounterPtr - (sizeof(typeData) * 3);
-        cout << CounterPtr << endl;
-
     }
 
     void Update(string fileN)
