@@ -30,7 +30,7 @@ public:
                 write((char *)&SizeArray, sizeof(int));
                 write((char *)&CurrentCountPtr, sizeof(int));
                 PtrFile = tellg();
-                CounterPtr = sizeof(typeData);
+                CounterPtr = sizeof(int);
                 seekg(PtrFile + CounterPtr, ios::beg);
                 PtrBeginArray = tellg();
                 cout << PtrBeginArray << endl;
@@ -82,14 +82,8 @@ public:
             write((char *)&CurrentCountPtr, sizeof(int));
             
             seekg(PtrFile + CounterPtr, ios::beg);
-           // DataAddress = tellg();
-            
             *this << el;
-            
             CounterPtr = CounterPtr + sizeof(typeData);
-            
-            //seekg(0, ios::end);
-            //write((char*)&DataAddress, sizeof(int));
         }
         else{
             
@@ -114,7 +108,6 @@ public:
         {
             seekg(DataOld, ios::beg);
             *this >> data;
-            //read((char*)&DataAddress, sizeof(int));
             DataOld = tellp();
             seekg(DataNew, ios::beg);
             
@@ -245,7 +238,7 @@ public:
             seekg(PtrBeginArray, ios::beg);
 
             PtrFile = tellg();
-            int element;
+            
             int elAdrress;
 
             int FileCopyPtr;
@@ -253,8 +246,7 @@ public:
             fileCopy.write((char *)&SizeArray, sizeof(int));
             fileCopy.write((char *)&CurrentCountPtr, sizeof(int));
             fileCopy.write((char *)&PtrBeginArray, sizeof(int));
-
-
+            
             for (int i = 0; i < CurrentCountPtr; i++)
             {
                 elAdrress = tellg();
@@ -263,16 +255,17 @@ public:
                 PtrFile = tellg();
                 FileCopyPtr = tellg();
                 seekg(elAdrress, ios::beg);
-                fileCopy.seekg(elAdrress, ios::beg);
+                
                 *this >> data;
                 fileCopy << data;
                 fileCopy.seekp(4,ios::cur);
                 seekg(PtrFile, ios::beg);
-                fileCopy.seekg(FileCopyPtr,ios::beg);
+                
                 
             }
             elAdrress = 0;
-            element = 0;
+            
+
             fileCopy.close();
         }
     }
@@ -286,32 +279,4 @@ public:
 
 
 
-// template <>
-// void BinaryFile<DateAndTime>::Review()
-// {
-//     seekg(0, ios::beg);
-//     read((char *)&SizeArray, sizeof(int));
-//     read((char *)&CurrentCountPtr, sizeof(int));
-//     read((char *)&PtrBeginArray, sizeof(int));
-//     cout << "Текущий размер массива --> " << SizeArray << endl;
-//     cout << "Текущее кол-во указателей --> " << CurrentCountPtr << endl;
 
-//     seekp(PtrBeginArray, ios::beg);
-
-//     int DataAddress;
-//     int DataElement;
-//     for (int i = 0; i < CurrentCountPtr; i++)
-//     {
-//         DataAddress = tellg();
-//         //read((char *)&DataElement, sizeof(int));
-//         *this >> data;
-//         PtrFile = tellp();
-//         seekg(DataAddress, ios::beg);
-//         cout << DataAddress << endl;
-//         *this >> data;
-//         cout << i + 1 << " --> " << data << endl;
-//         seekg(PtrFile, ios::beg);
-//     }
-//     DataAddress = 0;
-//     DataElement = 0;
-// }
